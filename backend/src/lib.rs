@@ -228,7 +228,7 @@ struct Database {
 impl Database {
     pub async fn new() -> Result<Self, LeaderboardError> {
         let db_options = SqliteConnectOptions::from_str(":memory:")
-            .map_err(|x| LeaderboardError::DatabaseSetup(x))?
+            .map_err(LeaderboardError::DatabaseSetup)?
             .create_if_missing(true)
             .disable_statement_logging()
             .to_owned();
@@ -236,7 +236,7 @@ impl Database {
         let pool = SqlitePoolOptions::new()
             .connect_with(db_options)
             .await
-            .map_err(|x| LeaderboardError::DatabaseSetup(x))?;
+            .map_err(LeaderboardError::DatabaseSetup)?;
 
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS UnclaimedScores (
@@ -247,7 +247,7 @@ impl Database {
         )
         .execute(&pool)
         .await
-        .map_err(|x| LeaderboardError::DatabaseSetup(x))?;
+        .map_err(LeaderboardError::DatabaseSetup)?;
 
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS Scores (
@@ -258,7 +258,7 @@ impl Database {
         )
         .execute(&pool)
         .await
-        .map_err(|x| LeaderboardError::DatabaseSetup(x))?;
+        .map_err(LeaderboardError::DatabaseSetup)?;
 
         Ok(Self { pool })
     }
@@ -268,12 +268,6 @@ pub async fn routes(auth_token: String) -> Result<Router, LeaderboardError> {
     let state = LeaderboardState {
         base_url: "http://localhost:3000".to_string(),
         token: auth_token,
-    };
-
-    UnclaimedScoreRow {
-        id: Uuid::new_v4(),
-        score: 1337,
-        color: "#123456".to_string(),
     };
 
     let database = Arc::new(Database::new().await?);
@@ -306,7 +300,7 @@ async fn leaderboard(
         sqlx::query_as::<_, ScoreRow>("SELECT nickname, score FROM Scores ORDER BY score DESC;")
             .fetch_all(&database.pool)
             .await
-            .map_err(|x| LeaderboardError::FetchError(x))?;
+            .map_err(LeaderboardError::FetchError)?;
 
     let mut placement_scores: Vec<PlacementScoreRow> = Vec::new();
 
@@ -334,7 +328,7 @@ async fn leaderboard(
         scores: placement_scores,
     }
     .render()
-    .map_err(|x| LeaderboardError::RenderError(x))?;
+    .map_err(LeaderboardError::RenderError)?;
 
     Ok(Html(leaderboard))
 }
@@ -365,7 +359,13 @@ async fn submit_score(
         return Err(LeaderboardError::MalformedColor);
     }
 
-    if score.color.chars().filter(|x| x.is_digit(16)).count() != 6 {
+    if score
+        .color
+        .chars()
+        .filter(|x| x.is_ascii_hexdigit())
+        .count()
+        != 6
+    {
         return Err(LeaderboardError::MalformedColor);
     }
 
@@ -380,7 +380,7 @@ async fn submit_score(
         .bind(score.color)
         .execute(&database.pool)
         .await
-        .map_err(|x| LeaderboardError::InsertFailure(x))?;
+        .map_err(LeaderboardError::InsertFailure)?;
 
     Ok(Json(json!({"id": id.to_string()})))
 }
@@ -392,11 +392,11 @@ async fn unclaimed_scores_list(
         sqlx::query_as::<_, UnclaimedScoreRow>("SELECT id, score, color FROM UnclaimedScores;")
             .fetch_all(&database.pool)
             .await
-            .map_err(|x| LeaderboardError::FetchError(x))?;
+            .map_err(LeaderboardError::FetchError)?;
 
     let unclaimed = ClaimListTemplate { unclaimed_scores }
         .render()
-        .map_err(|x| LeaderboardError::RenderError(x))?;
+        .map_err(LeaderboardError::RenderError)?;
 
     Ok(Html(unclaimed))
 }
@@ -407,7 +407,7 @@ async fn claim_score_form(Path(id): Path<String>) -> Result<impl IntoResponse, L
         error_message: None,
     }
     .render()
-    .map_err(|x| LeaderboardError::RenderError(x))?;
+    .map_err(LeaderboardError::RenderError)?;
 
     Ok(Html(form))
 }
@@ -429,7 +429,7 @@ async fn claim_score_submit(
     .bind(id)
     .fetch_one(&database.pool)
     .await
-    .map_err(|x| LeaderboardError::FetchError(x))?;
+    .map_err(LeaderboardError::FetchError)?;
 
     // leaderboard submission
     if let Some(wants_leaderboard) = claim.wants_leaderboard {
@@ -461,7 +461,7 @@ async fn claim_score_submit(
         .bind(id)
         .execute(&database.pool)
         .await
-        .map_err(|x| LeaderboardError::DeleteError(x))?;
+        .map_err(LeaderboardError::DeleteError)?;
 
     if let Some(nickname) = sanitized_nickname {
         sqlx::query("INSERT INTO Scores (nickname, score) VALUES (?, ?);")
@@ -469,7 +469,7 @@ async fn claim_score_submit(
             .bind(score.score)
             .execute(&database.pool)
             .await
-            .map_err(|x| LeaderboardError::InsertFailure(x))?;
+            .map_err(LeaderboardError::InsertFailure)?;
     }
 
     if submit_form {
@@ -482,7 +482,7 @@ async fn claim_score_submit(
             })
             .send()
             .await
-            .map_err(|x| LeaderboardError::TransmitError(x))?;
+            .map_err(LeaderboardError::TransmitError)?;
     }
 
     Ok(Redirect::to(&format!("{}/claim/list", state.base_url)))

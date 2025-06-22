@@ -109,7 +109,7 @@ async fn claim_score_2(server: &TestServer) {
     };
 
     let response = server
-        .post(&format!("/claim/{}", id.to_string()))
+        .post(&format!("/claim/{}", id))
         .form(&body)
         .await;
 
@@ -131,7 +131,7 @@ async fn claim_score_username(server: &TestServer, nickname: &str) {
     };
 
     let response = server
-        .post(&format!("/claim/{}", id.to_string()))
+        .post(&format!("/claim/{}", id))
         .form(&body)
         .await;
 
@@ -180,7 +180,7 @@ async fn visiting_right_score_id_returns_claim_form() {
 
     let id = submit_score(&server).await;
 
-    let response = server.get(&format!("/claim/{}", id.to_string())).await;
+    let response = server.get(&format!("/claim/{}", id)).await;
     response.assert_status_ok();
 }
 
@@ -203,7 +203,7 @@ async fn claimed_score_shows_up_on_leaderboard() {
     };
 
     let response = server
-        .post(&format!("/claim/{}", id.to_string()))
+        .post(&format!("/claim/{}", id))
         .form(&body)
         .await;
 
@@ -363,7 +363,7 @@ async fn form_submit_unset_checkboxes_dont_copy_internally() {
     };
 
     let response = server
-        .post(&format!("/claim/{}", id.to_string()))
+        .post(&format!("/claim/{}", id))
         .form(&body)
         .await;
 

@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+    <head>
+        <link rel="stylesheet" href="/assets/style.css">
+    </head>
+    <body>
+        {%- if scores.is_empty() %}
+        <p class="no-scores">No scores have been recorded yet! Be the first one!</p>
+        {%- else %}
+        <table>
+            {%- for score in scores %}
+            {%- if score.placement == 1 %}
+            <tr class="first">
+            {%- else if score.placement == 2 %}
+            <tr class="second">
+            {%- else if score.placement == 3 %}
+            <tr class="third">
+            {%- else %}
+            <tr>{% endif %}
+                <td class="placement">{{ score.placement }}</td>
+                <td class="name">{{ score.nickname }}</td>
+                <td class="score">{{ score.score }}</td>
+            </tr>
+            {%- endfor %}
+        </table>
+        {%- endif %}
+    </body>
+</html>

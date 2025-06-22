@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+    <head>
+        <link rel="stylesheet" href="/assets/form.css">
+    </head>
+    <script src="/assets/script.js" referrerpolicy="no-referror"></script>
+    <body>
+        <form method="post">
+            <div>
+                <input
+                    id="wants-leaderboard"
+                    name="wants_leaderboard"
+                    type="checkbox"
+                    value="true"
+                />
+                <label for="wants-leaderboard">
+                    Möchtest du auf dem Scoreboard auftauchen?
+                </label>
+                <div class="expandable">
+                    <p class="note">
+                        Der Name, den du hier angibst, wird zusammen mit deinem Punktstand auf dem Scoreboard auftauchen. Wir werden die Datenbank, die die Punktstände und Namen enthält, am Ende der GamesCom löschen.
+                    </p>
+                    <span>
+                        <label for="nickname">
+                            Dein Pseudonym
+                        </label>
+                        <input id="nickname" name="nickname" type="text" />
+                    </span>
+                </div>
+            </div>
+            <div>
+                <input
+                    id="wants-key"
+                    name="wants_key"
+                    type="checkbox"
+                    value="true"
+                />
+                <label for="wants_key">
+                    Möchtest du einen Steam-Key für das Spiel erhalten?
+                    <sup><a href="#steam">[2]</a></sup>
+                </label>
+
+                <div class="expandable">
+                    <input id="email" name="email" type="email" />
+                    <label for="email">
+                        Die E-Mail, an die du den Steam-Key gesendet haben willst
+                    </label>
+                </div>
+            </div>
+            <div>
+                <input
+                    id="wants-hpi"
+                    name="wants_hpi"
+                    type="checkbox"
+                    value="true"
+                />
+                <label for="wants_hpi">
+                    Möchtest du Informationen über das Studium am HPI erhalten?
+                    <sup><a href="#studying">[3]</a></sup>
+                </label>
+                <div class="expandable">
+                    <input id="email-hpi" name="email_hpi" type="email" />
+                    <label for="email_hpi">
+                        Die E-Mail, an die du die Info-Mails der Öffentlichkeitsarbeit geschickt haben möchtest
+                    </label>
+                    <input id="name-hpi" name="name" type="text" />
+                    <label for="name">Dein Name</label>
+                </div>
+            </div>
+
+            <input type="submit" value="submit" />
+        </form>
+
+        <section id="footnotes">
+            <p id="steam">
+                Die Email, die du hier angibst, wird benutzt um dir einmalig einen Steam-Key zukommen zu lassen. Wir werden die Daten danach wieder löschen.
+            </p>
+            <p id="studying">
+                Die Daten, die du hier angibst, werden automatisiert an ein Formular der HPI-Öffentlichkeitsarbeit weitergeleitet. Du solltest eine E-Mail erhalten, auf der du nochmal die Eingabe bestätigen musst. Was die Öffentlichkeitsarbeit dann mit den Daten macht, wissen wir nicht. Weitere Information findest du auf
+                <a href="https://hpi.de/">hpi.de</a>
+            </p>
+        </section>
+    </body>
+</html>

@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+    <head></head>
+    <body>
+        {% if unclaimed_scores.is_empty() -%}
+        Aktuell gibt es keine Scores, die noch keinen Nutzernamen zugeordnet wurden. Hast du das Spiel bereits verlassen?
+        {% else -%}
+        <ul>
+            {% for score in unclaimed_scores -%}
+            <li>
+                <a href="/claim/{{ score.id }}">
+                    {{ score.color }}: {{ score.score }}
+                </a>
+            </li>
+            {% endfor -%}
+        </ul>
+
+        {% endif %}
+    </body>
+</html>

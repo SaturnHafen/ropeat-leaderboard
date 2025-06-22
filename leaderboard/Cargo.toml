@@ -1,0 +1,9 @@
+[package]
+name = "ropeat-leaderboard"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = "0.8.4"
+backend = { version = "0.1.0", path = "../backend" }
+tokio = "1.45.1"

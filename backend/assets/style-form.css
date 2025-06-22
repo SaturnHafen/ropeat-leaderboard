@@ -1,0 +1,52 @@
+.expandable {
+    display: none;
+}
+
+input:checked ~ .expandable {
+    display: block;
+}
+
+:root {
+    --hpi-red: #b1063a;
+    --hpi-orange: #dd6108;
+    --hpi-yellow: #f6a800;
+    --hpi-gray: #5a6065;
+
+    --hpi-blue: #007a9e;
+    --hpi-cyan: #007f6f;
+    --hpi-green: #779a0b;
+    --hpi-violet: #7664a0;
+
+    --color-first: var(--hpi-yellow);
+    --color-second: var(--hpi-orange);
+    --color-third: var(--hpi-red);
+    --color-text: var(--hpi-gray);
+    --viewport-width: 75%;
+
+    --text-size: 1.5em;
+
+    color: var(--color-text);
+}
+
+body {
+    width: var(--viewport-width);
+    margin-left: calc((100% - var(--viewport-width)) / 2);
+}
+
+input:invalid {
+    border: 1px solid var(--hpi-orange);
+}
+
+input:valid {
+    border: 1px solid var(--hpi-green);
+}
+
+input::after {
+    content: "✓";
+}
+
+p.note {
+    border-left: 5px solid var(--hpi-violet);
+    border-radius: 2px;
+    padding-left: 10px;
+}

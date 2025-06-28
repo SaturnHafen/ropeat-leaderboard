@@ -29,7 +29,10 @@ use std::{str::FromStr, sync::Arc};
 use templating::{ClaimFormTemplate, ClaimListTemplate, LeaderboardTemplate};
 use uuid::Uuid;
 
-use crate::r#static::{form_style, script};
+use crate::{
+    helper::slow_equals,
+    r#static::{form_style, script},
+};
 
 #[derive(Deserialize, Debug, Clone)]
 struct RecievedScore {
@@ -216,7 +219,7 @@ async fn submit_score(
         return Err(LeaderboardError::MissingAuth);
     };
 
-    if authorization.as_bytes() != state.token.as_bytes() {
+    if slow_equals(authorization.as_bytes(), state.token.as_bytes()) {
         return Err(LeaderboardError::WrongAuth);
     }
 
@@ -328,9 +331,13 @@ async fn claim_score_submit(
         sanitized_nickname = Some(helper::sanitize_name(claim.nickname.trim_end().to_string()));
     };
 
-    if let Some(wants_key) = claim.wants_raffle {
-        if wants_key && claim.email.trim_end().is_empty() {
-            todo!("Redirect back to form, email not provided");
+    if let Some(wants_raffle) = claim.wants_raffle {
+        if wants_raffle
+            && (claim.email.trim_end().is_empty()
+                || claim.firstname.trim_end().is_empty()
+                || claim.lastname.trim_end().is_empty())
+        {
+            todo!("Redirect back to form, something not provided");
         }
 
         submit_form = true;

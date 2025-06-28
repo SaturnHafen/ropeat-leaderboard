@@ -52,10 +52,7 @@ impl std::fmt::Display for LeaderboardError {
                 write!(fmt, "You didn't provide a valid id!")
             }
             LeaderboardError::TransmitError(x) => {
-                write!(
-                    fmt,
-                    "Couldn't transmit data to the HPI server! Reason: {x}"
-                )
+                write!(fmt, "Couldn't transmit data to the HPI server! Reason: {x}")
             }
             LeaderboardError::IncompleteData(x) => {
                 write!(fmt, "You didn't provide all necessary data points! ({x})")
@@ -115,7 +112,19 @@ impl IntoResponse for LeaderboardError {
             LeaderboardError::TransactionBeginError(_) => {
                 todo!("implement `500 internal server error`")
             }
-            LeaderboardError::TransmitError(_) => todo!("implement `500 internal server error`"),
+            LeaderboardError::TransmitError(x) => {
+                if cfg!(debug_assertions) {
+                    Response::builder()
+                        .status(StatusCode::INTERNAL_SERVER_ERROR)
+                        .body(Body::from(format!("TransmitError: {x}")))
+                        .unwrap()
+                } else {
+                    Response::builder()
+                        .status(StatusCode::INTERNAL_SERVER_ERROR)
+                        .body(Body::from("Wir konnten dich leider nicht in das Gewinnspiel-Formular eintragen. Bitte frage einen der anwesenden Standbetreuenden um Hilfe!"))
+                        .unwrap()
+                }
+            }
             LeaderboardError::InsertFailure(_) => todo!("implement `500 internal server error`"),
             LeaderboardError::FetchError(x) => {
                 if cfg!(debug_assertions) {

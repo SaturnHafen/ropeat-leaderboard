@@ -1,3 +1,31 @@
+pub fn slow_equals(a: &[u8], b: &[u8]) -> bool {
+    let mut result = a.len() == b.len();
+
+    if result {
+        for (a_i, b_i) in a.iter().zip(b) {
+            result &= a_i == b_i;
+        }
+    }
+
+    result
+}
+
+#[test]
+fn unequal_length_gets_rejected() {
+    assert!(!slow_equals("abcd".as_bytes(), "abcdefgh".as_bytes()));
+    assert!(!slow_equals("abcdefgh".as_bytes(), "abcd".as_bytes()));
+}
+
+#[test]
+fn unequal_values_get_rejected() {
+    assert!(!slow_equals("abcd".as_bytes(), "efgh".as_bytes()))
+}
+
+#[test]
+fn equal_values_get_accepted() {
+    assert!(slow_equals("abcd".as_bytes(), "abcd".as_bytes()))
+}
+
 pub fn sanitize_name(name: String) -> String {
     // See <https://stackoverflow.com/questions/7381974/which-characters-need-to-be-escaped-in-html#7382028>
     name.replace("&", "&amp;")

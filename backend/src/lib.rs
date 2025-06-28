@@ -219,7 +219,7 @@ async fn submit_score(
         return Err(LeaderboardError::MissingAuth);
     };
 
-    if slow_equals(authorization.as_bytes(), state.token.as_bytes()) {
+    if !slow_equals(authorization.as_bytes(), state.token.as_bytes()) {
         return Err(LeaderboardError::WrongAuth);
     }
 

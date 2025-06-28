@@ -1,84 +1,70 @@
 <!doctype html>
 <html>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <head>
-        <link rel="stylesheet" href="/assets/form.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+        <link href="/assets/form.css" rel="stylesheet" />
     </head>
     <script src="/assets/script.js" referrerpolicy="no-referror"></script>
     <body>
         <form method="post">
-            <div>
-                <input
-                    id="wants-leaderboard"
-                    name="wants_leaderboard"
-                    type="checkbox"
-                    value="true"
-                />
-                <label for="wants-leaderboard">
-                    Möchtest du auf dem Scoreboard auftauchen?
-                </label>
+            <div class="mb-3">
+                <input id="wants-leaderboard" name="wants_leaderboard" type="checkbox" class="form-check-input" value="true" />
+                <label for="wants-leaderboard" class="form-check-label">Ich möchte auf dem Scoreboard auftauchen</label>
+
                 <div class="expandable">
-                    <p class="note">
-                        Der Name, den du hier angibst, wird zusammen mit deinem Punktstand auf dem Scoreboard auftauchen. Wir werden die Datenbank, die die Punktstände und Namen enthält, am Ende der GamesCom löschen.
+                    <p class="callout-info">
+                        Die Daten, die du hier eingibst, speichern wir für den Verlauf der GamesCom (und löschen die danach wieder).
+                        Das Scoreboard ist komplett unabhängig von dem Gewinnspiel.
                     </p>
-                    <span>
-                        <label for="nickname">
-                            Dein Pseudonym
-                        </label>
-                        <input id="nickname" name="nickname" type="text" />
-                    </span>
+                    <div class="form-floating mb-3">
+                        <input id="nickname" name="nickname" type="text" class="form-control" aria-describedby="nickname-help" />
+                        <label for="nickname" class="form-label">Dein Pseudonym</label>
+                        <p id="nickname-help" class="form-text">Der Name, der auf dem Scoreboard neben deinem Punktestand stehen wird</p>
+                    </div>
                 </div>
             </div>
-            <div>
-                <input
-                    id="wants-key"
-                    name="wants_key"
-                    type="checkbox"
-                    value="true"
-                />
-                <label for="wants_key">
-                    Möchtest du einen Steam-Key für das Spiel erhalten?
-                    <sup><a href="#steam">[2]</a></sup>
-                </label>
+            <div class="mb-3">
+                <input id="wants-raffle" name="wants_raffle" type="checkbox" class="form-check-input" value="true" />
+                <label for="wants-raffle" class="form-check-label">Ich möchte an der Verlosung teilnehmen</label>
 
                 <div class="expandable">
-                    <input id="email" name="email" type="email" />
-                    <label for="email">
-                        Die E-Mail, an die du den Steam-Key gesendet haben willst
-                    </label>
-                </div>
-            </div>
-            <div>
-                <input
-                    id="wants-hpi"
-                    name="wants_hpi"
-                    type="checkbox"
-                    value="true"
-                />
-                <label for="wants_hpi">
-                    Möchtest du Informationen über das Studium am HPI erhalten?
-                    <sup><a href="#studying">[3]</a></sup>
-                </label>
-                <div class="expandable">
-                    <input id="email-hpi" name="email_hpi" type="email" />
-                    <label for="email_hpi">
-                        Die E-Mail, an die du die Info-Mails der Öffentlichkeitsarbeit geschickt haben möchtest
-                    </label>
-                    <input id="name-hpi" name="name" type="text" />
-                    <label for="name">Dein Name</label>
+                    <p class="callout-info">
+                        Die Daten, die du hier eingibst, werden automatisch an ein Formular vom HPI weitergeleitet.<br />
+                        <strong>Um die Teilnahme zu bestätigen, bekommst du eine E-Mail, die du nochmal bestätigen musst.</strong><br />
+
+                        Die HPI-Öffentlichkeitsarbeit wird dir E-Mails bezüglich des Gewinnspiels und zu Studieninformationszwecken schicken.
+
+                        <a href="https://hpi.de/impressum/" target="_blank">Hier gehts zum Impressum vom HPI</a>
+                    </p>
+
+                    <!-- Namensstuff -->
+                    <div class="row g-2">
+                        <div class="col-md">
+                            <div class="form-floating mb-3">
+                                <input id="firstname" name="firstname" type="text" class="form-control" />
+                                <label for="firstname" class="form-label">Dein Vorname</label>
+                            </div>
+                        </div>
+                        <div class="col-md">
+                            <div class="form-floating mb-3">
+                                <input id="lastname" name="lastname" type="text" class="form-control" />
+                                <label for="lastname" class="form-label">Dein Nachname</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- E-Mail stuff -->
+                    <div class="form-floating mb-3">
+                        <input id="email" name="email" type="email" class="form-control" aria-describedby="email-help" />
+                        <label for="email" class="form-label">Deine E-Mail</label>
+                        <p id="email-help" class="form-text">Die E-Mail, mit der du an der Verlosung teilnehmen möchtest und an die Infos vom HPI gesendet werden</p>
+                    </div>
                 </div>
             </div>
 
-            <input type="submit" value="submit" />
+            <input type="submit" class="btn btn-primary" />
         </form>
-
-        <section id="footnotes">
-            <p id="steam">
-                Die Email, die du hier angibst, wird benutzt um dir einmalig einen Steam-Key zukommen zu lassen. Wir werden die Daten danach wieder löschen.
-            </p>
-            <p id="studying">
-                Die Daten, die du hier angibst, werden automatisiert an ein Formular der HPI-Öffentlichkeitsarbeit weitergeleitet. Du solltest eine E-Mail erhalten, auf der du nochmal die Eingabe bestätigen musst. Was die Öffentlichkeitsarbeit dann mit den Daten macht, wissen wir nicht. Weitere Information findest du auf
-                <a href="https://hpi.de/">hpi.de</a>
-            </p>
-        </section>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
     </body>
 </html>

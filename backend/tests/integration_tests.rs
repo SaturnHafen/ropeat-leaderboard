@@ -33,13 +33,13 @@ struct BadScoreFormat {}
 #[derive(Serialize)]
 struct GoodFormSubmitFormat {
     wants_leaderboard: Option<bool>,
-    wants_key: Option<bool>,
-    wants_hpi: Option<bool>,
+    wants_raffle: Option<bool>,
+
+    nickname: String,
 
     email: String,
-    email_hpi: String,
-    nickname: String,
-    name: String,
+    firstname: String,
+    lastname: String,
 }
 
 #[derive(Serialize)]
@@ -51,7 +51,7 @@ struct SubmitResponse {
 }
 
 async fn setup_server() -> TestServer {
-    TestServer::new(routes(GOOD_TOKEN.to_string()).await.unwrap()).unwrap()
+    TestServer::new(routes(GOOD_TOKEN).await.unwrap()).unwrap()
 }
 
 async fn submit_score(server: &TestServer) -> Uuid {
@@ -99,19 +99,15 @@ async fn claim_score_2(server: &TestServer) {
 
     let body = GoodFormSubmitFormat {
         wants_leaderboard: Some(true),
-        wants_hpi: None,
-        wants_key: None,
+        wants_raffle: None,
 
         nickname: NORMAL_NICKNAME_2.to_string(),
         email: "".to_string(),
-        email_hpi: "".to_string(),
-        name: "".to_owned(),
+        firstname: "".to_string(),
+        lastname: "".to_string(),
     };
 
-    let response = server
-        .post(&format!("/claim/{}", id))
-        .form(&body)
-        .await;
+    let response = server.post(&format!("/claim/{}", id)).form(&body).await;
 
     //response.assert_status_ok();
 }
@@ -121,19 +117,15 @@ async fn claim_score_username(server: &TestServer, nickname: &str) {
 
     let body = GoodFormSubmitFormat {
         wants_leaderboard: Some(true),
-        wants_hpi: None,
-        wants_key: None,
+        wants_raffle: None,
 
         nickname: nickname.to_string(),
         email: "".to_string(),
-        email_hpi: "".to_string(),
-        name: "".to_owned(),
+        firstname: "".to_string(),
+        lastname: "".to_owned(),
     };
 
-    let response = server
-        .post(&format!("/claim/{}", id))
-        .form(&body)
-        .await;
+    let response = server.post(&format!("/claim/{}", id)).form(&body).await;
 
     //response.assert_status_ok();
 }
@@ -193,19 +185,15 @@ async fn claimed_score_shows_up_on_leaderboard() {
 
     let body = GoodFormSubmitFormat {
         wants_leaderboard: Some(true),
-        wants_hpi: None,
-        wants_key: None,
+        wants_raffle: None,
 
         nickname: NORMAL_NICKNAME.to_string(),
         email: "".to_string(),
-        email_hpi: "".to_string(),
-        name: "".to_owned(),
+        firstname: "".to_string(),
+        lastname: "".to_owned(),
     };
 
-    let response = server
-        .post(&format!("/claim/{}", id))
-        .form(&body)
-        .await;
+    let response = server.post(&format!("/claim/{}", id)).form(&body).await;
 
     response.assert_status(StatusCode::SEE_OTHER); // we want a redirect to /claim/list
 
@@ -322,6 +310,7 @@ async fn bad_submitted_score_doesnt_show_on_unclaimed_list() {
 }
 
 #[tokio::test]
+#[ignore = "not implemented"]
 async fn double_claim_score_doesnt_work() {
     // when submitting a claim form twice for the same score, the second one doesn't work
     todo!()
@@ -345,6 +334,7 @@ async fn username_gets_filtered_for_html_chars() {
 }
 
 #[tokio::test]
+#[ignore = "not implemented"]
 async fn form_submit_unset_checkboxes_dont_copy_internally() {
     // when submitting a claim form with text in the boxes, these don't get transfered to the form submissions / leaderboard
     let server = setup_server().await;
@@ -353,19 +343,31 @@ async fn form_submit_unset_checkboxes_dont_copy_internally() {
 
     let body = GoodFormSubmitFormat {
         wants_leaderboard: Some(true),
-        wants_hpi: None,
-        wants_key: None,
+        wants_raffle: None,
 
         nickname: NORMAL_NICKNAME.to_string(),
         email: "".to_string(),
-        email_hpi: "".to_string(),
-        name: "".to_owned(),
+        firstname: "".to_string(),
+        lastname: "".to_owned(),
     };
 
-    let response = server
-        .post(&format!("/claim/{}", id))
-        .form(&body)
-        .await;
+    let response = server.post(&format!("/claim/{}", id)).form(&body).await;
+
+    todo!()
+}
+
+#[tokio::test]
+#[ignore = "not implemented"]
+async fn website_form_submit_works_always() {
+    // if you submit the website form, it always works without returning an error
+
+    todo!()
+}
+
+#[tokio::test]
+#[ignore = "not implemented"]
+async fn cant_load_page_with_unknown_id() {
+    // If you try to load a page with an unknown (but valid) id, it fails and redirects to the list page
 
     todo!()
 }

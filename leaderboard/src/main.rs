@@ -2,7 +2,7 @@ use backend::{routes, LeaderboardError};
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), LeaderboardError> {
-    let auth_token = "abcd".to_string();
+    let auth_token = "abcd";
     let app: axum::Router = routes(auth_token).await?;
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")

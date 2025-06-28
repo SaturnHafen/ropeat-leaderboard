@@ -1,20 +1,23 @@
+mod error;
+mod helper;
 mod r#static;
 mod templating;
 
+pub use error::LeaderboardError;
+
 use askama::Template;
 use axum::{
-    body::Body,
     extract::{Path, State},
     http::{
         header::{self, AUTHORIZATION},
-        HeaderMap, Response,
+        HeaderMap,
     },
     response::{Html, IntoResponse, Redirect},
     routing::{get, post},
     Extension, Form, Json, Router,
 };
 use r#static::{font, icon, robots, style};
-use reqwest::StatusCode;
+
 use serde_derive::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::{
@@ -57,167 +60,36 @@ pub struct PlacementScoreRow {
 #[derive(Deserialize, Debug)]
 struct ClaimScore {
     wants_leaderboard: Option<bool>,
-    wants_key: Option<bool>,
-    wants_hpi: Option<bool>,
+    wants_raffle: Option<bool>,
+
+    nickname: String,
 
     email: String,
-    email_hpi: String,
-    nickname: String,
-    name: String,
+    firstname: String,
+    lastname: String,
 }
 
-#[derive(Debug)]
-pub enum LeaderboardError {
-    AxumServer(std::io::Error),
-    TcpListener(std::io::Error),
-    DatabaseSetup(sqlx::Error),
-    TransactionBeginError(sqlx::Error),
-    MissingAuth,
-    WrongAuth,
-    InvalidId,
-    TransmitError(reqwest::Error),
-    InsertFailure(sqlx::Error),
-    FetchError(sqlx::Error),
-    DeleteError(sqlx::Error),
-    RenderError(askama::Error),
-    InvalidScore,
-    MalformedColor,
-    IncompleteData(String),
-}
-
-impl std::fmt::Display for LeaderboardError {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            LeaderboardError::AxumServer(x) => {
-                write!(fmt, "Couldn't start the server! Reason: {}", x)
-            }
-            LeaderboardError::TcpListener(x) => {
-                write!(fmt, "Couldn't launch TcpListener! Reason: {}", x)
-            }
-            LeaderboardError::DatabaseSetup(x) => {
-                write!(
-                    fmt,
-                    "Something went wrong while starting the database! Reason: {}",
-                    x
-                )
-            }
-            LeaderboardError::TransactionBeginError(x) => {
-                write!(fmt, "Couldn't start transaction. Reason: {}", x)
-            }
-            LeaderboardError::MissingAuth => {
-                write!(fmt, "You didn't provide any credentials!")
-            }
-            LeaderboardError::WrongAuth => {
-                write!(fmt, "You didn't provide valid credentials!")
-            }
-            LeaderboardError::InvalidId => {
-                write!(fmt, "You didn't provide a valid id!")
-            }
-            LeaderboardError::TransmitError(x) => {
-                write!(
-                    fmt,
-                    "Couldn't transmit data to the HPI server! Reason: {}",
-                    x
-                )
-            }
-            LeaderboardError::IncompleteData(x) => {
-                write!(fmt, "You didn't provide all necessary data points! ({})", x)
-            }
-            LeaderboardError::InsertFailure(x) => {
-                write!(fmt, "Something went wrong while inserting! Reason: {}", x)
-            }
-            LeaderboardError::FetchError(x) => {
-                write!(fmt, "Couldn't fetch leaderboard! Reason: {}", x)
-            }
-            LeaderboardError::DeleteError(x) => {
-                write!(fmt, "Couldn't delete unclaimed score! Reason: {}", x)
-            }
-            LeaderboardError::RenderError(x) => {
-                write!(fmt, "Couldn't render template! Reason: {}", x)
-            }
-            LeaderboardError::InvalidScore => {
-                write!(fmt, "The score is not valid!")
-            }
-            LeaderboardError::MalformedColor => {
-                write!(fmt, "The color is not valid!")
-            }
-        }
-    }
-}
-
-impl std::error::Error for LeaderboardError {}
-
-impl IntoResponse for LeaderboardError {
-    fn into_response(self) -> axum::response::Response {
-        match self {
-            LeaderboardError::AxumServer(_)
-            | LeaderboardError::TcpListener(_)
-            | LeaderboardError::DatabaseSetup(_) => {
-                unreachable!("The server is not even up!")
-            }
-            LeaderboardError::MissingAuth => Response::builder()
-                .status(StatusCode::UNAUTHORIZED)
-                .body(Body::from("You didn't provide a authorization token!"))
-                .unwrap(),
-            LeaderboardError::WrongAuth => Response::builder()
-                .status(StatusCode::UNAUTHORIZED)
-                .body(Body::from(
-                    "You didn't provide a valid authorization token!",
-                ))
-                .unwrap(),
-            LeaderboardError::InvalidId => Response::builder()
-                .status(StatusCode::BAD_REQUEST)
-                .body(Body::from(
-                    "The given id is malformed! Where did you get it from?",
-                ))
-                .unwrap(),
-            LeaderboardError::IncompleteData(x) => Response::builder()
-                .status(StatusCode::BAD_REQUEST)
-                .body(Body::from("you didn't enter all necessary data pieces"))
-                .unwrap(),
-            LeaderboardError::TransactionBeginError(_) => {
-                todo!("implement `500 internal server error`")
-            }
-            LeaderboardError::TransmitError(_) => todo!("implement `500 internal server error`"),
-            LeaderboardError::InsertFailure(_) => todo!("implement `500 internal server error`"),
-            LeaderboardError::FetchError(x) => {
-                if cfg!(debug_assertions) {
-                    Response::builder()
-                        .status(StatusCode::INTERNAL_SERVER_ERROR)
-                        .body(Body::from(format!("FetchError: {}", x)))
-                        .unwrap()
-                } else {
-                    Response::builder()
-                        .status(StatusCode::INTERNAL_SERVER_ERROR)
-                        .body(Body::empty())
-                        .unwrap()
-                }
-            }
-            LeaderboardError::DeleteError(_) => todo!("implement error"),
-            LeaderboardError::RenderError(_) => todo!("implement `500 internal server error`"),
-            LeaderboardError::InvalidScore => Response::builder()
-                .status(StatusCode::BAD_REQUEST)
-                .header("Content-Type", "application/json")
-                .body(Body::from(json!({"error": "Invalid score"}).to_string()))
-                .unwrap(),
-            LeaderboardError::MalformedColor => Response::builder()
-                .status(StatusCode::BAD_REQUEST)
-                .header("Content-Type", "application/json")
-                .body(Body::from(json!({"error": "Malformed color"}).to_string()))
-                .unwrap(),
+impl Into<HPIFormSubmission> for ClaimScore {
+    fn into(self) -> HPIFormSubmission {
+        HPIFormSubmission {
+            firstname: self.firstname,
+            lastname: self.lastname,
+            email: self.email,
         }
     }
 }
 
 #[derive(Clone)]
-struct LeaderboardState {
-    base_url: String,
-    token: String,
+struct LeaderboardConfig<'a> {
+    form_submit_url: &'a str,
+    base_url: &'a str,
+    token: &'a str,
 }
 
 #[derive(Debug, Clone, Serialize)]
 struct HPIFormSubmission {
-    name: String,
+    firstname: String,
+    lastname: String,
     email: String,
 }
 
@@ -264,9 +136,10 @@ impl Database {
     }
 }
 
-pub async fn routes(auth_token: String) -> Result<Router, LeaderboardError> {
-    let state = LeaderboardState {
-        base_url: "http://localhost:3000".to_string(),
+pub async fn routes(auth_token: &'static str) -> Result<Router, LeaderboardError> {
+    let state = LeaderboardConfig {
+        form_submit_url: "http://localhost:1234/asdf",
+        base_url: "http://localhost:3000",
         token: auth_token,
     };
 
@@ -335,7 +208,7 @@ async fn leaderboard(
 
 async fn submit_score(
     headers: HeaderMap,
-    State(state): State<LeaderboardState>,
+    State(state): State<LeaderboardConfig<'_>>,
     Extension(database): Extension<Arc<Database>>,
     Json(score): Json<RecievedScore>, // put every extractor above this!
 ) -> Result<impl IntoResponse, LeaderboardError> {
@@ -401,9 +274,22 @@ async fn unclaimed_scores_list(
     Ok(Html(unclaimed))
 }
 
-async fn claim_score_form(Path(id): Path<String>) -> Result<impl IntoResponse, LeaderboardError> {
+async fn claim_score_form(
+    Path(id): Path<String>,
+    Extension(database): Extension<Arc<Database>>,
+) -> Result<impl IntoResponse, LeaderboardError> {
+    let uuid = Uuid::from_str(&id).map_err(|_| LeaderboardError::InvalidId)?;
+
+    let _unclaimed_scores = sqlx::query_as::<_, UnclaimedScoreRow>(
+        "SELECT id, score, color FROM UnclaimedScores WHERE id = ?;",
+    )
+    .bind(uuid)
+    .fetch_one(&database.pool)
+    .await
+    .map_err(LeaderboardError::FetchError)?;
+
     let form = ClaimFormTemplate {
-        id: Uuid::from_str(&id).map_err(|_| LeaderboardError::InvalidId)?,
+        id: uuid,
         error_message: None,
     }
     .render()
@@ -413,7 +299,7 @@ async fn claim_score_form(Path(id): Path<String>) -> Result<impl IntoResponse, L
 }
 
 async fn claim_score_submit(
-    State(state): State<LeaderboardState>,
+    State(state): State<LeaderboardConfig<'_>>,
     Path(id): Path<String>,
     Extension(database): Extension<Arc<Database>>,
     Form(claim): Form<ClaimScore>, // put every extractor above this!
@@ -439,22 +325,18 @@ async fn claim_score_submit(
             todo!("Redirect back to form, nickname not provided");
         }
 
-        sanitized_nickname = Some(sanitize_name(claim.nickname.trim_end().to_string()));
+        sanitized_nickname = Some(helper::sanitize_name(claim.nickname.trim_end().to_string()));
     };
 
-    if let Some(wants_key) = claim.wants_key {
+    if let Some(wants_key) = claim.wants_raffle {
         if wants_key && claim.email.trim_end().is_empty() {
             todo!("Redirect back to form, email not provided");
         }
-    };
-
-    if let Some(wants_hpi) = claim.wants_hpi {
-        if wants_hpi && (claim.email.trim_end().is_empty() || claim.name.trim_end().is_empty()) {
-            todo!("Redirect back to form, email or name not provided");
-        }
 
         submit_form = true;
-    };
+    }
+
+    // ----------- RACE CONDITION ?! -----------
 
     // delete score
     sqlx::query("DELETE FROM UnclaimedScores WHERE id = ?")
@@ -473,42 +355,16 @@ async fn claim_score_submit(
     }
 
     if submit_form {
+        let form_data: HPIFormSubmission = claim.into();
+
         let client = reqwest::Client::new();
         client
-            .post("https://localhost:1337/asdf")
-            .form(&HPIFormSubmission {
-                name: "test".to_string(),
-                email: "asdf@1245".to_string(),
-            })
+            .post(state.form_submit_url)
+            .form(&form_data)
             .send()
             .await
             .map_err(LeaderboardError::TransmitError)?;
     }
 
     Ok(Redirect::to(&format!("{}/claim/list", state.base_url)))
-}
-
-fn sanitize_name(name: String) -> String {
-    // See <https://stackoverflow.com/questions/7381974/which-characters-need-to-be-escaped-in-html#7382028>
-    name.replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-        .replace("\"", "&quot;")
-        .replace("'", "&#39;")
-}
-
-#[test]
-fn simple_xss_gets_replaced() {
-    assert_eq!(
-        sanitize_name("<script>alert(1);</script>".to_string()),
-        "&lt;script&gt;alert(1);&lt;/script&gt;".to_string()
-    );
-}
-
-#[test]
-fn all_evil_chars_get_replaced() {
-    assert_eq!(
-        sanitize_name("&<>\"'".to_string()),
-        "&amp;&lt;&gt;&quot;&#39;".to_string()
-    )
 }

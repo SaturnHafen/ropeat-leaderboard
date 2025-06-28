@@ -107,9 +107,8 @@ async fn claim_score_2(server: &TestServer) {
         lastname: "".to_string(),
     };
 
-    let response = server.post(&format!("/claim/{}", id)).form(&body).await;
-
-    //response.assert_status_ok();
+    let response = server.post(&format!("/claim/{id}")).form(&body).await;
+    response.assert_status_in_range(300..400);
 }
 
 async fn claim_score_username(server: &TestServer, nickname: &str) {
@@ -125,9 +124,8 @@ async fn claim_score_username(server: &TestServer, nickname: &str) {
         lastname: "".to_owned(),
     };
 
-    let response = server.post(&format!("/claim/{}", id)).form(&body).await;
-
-    //response.assert_status_ok();
+    let response = server.post(&format!("/claim/{id}")).form(&body).await;
+    response.assert_status_in_range(300..400);
 }
 
 #[tokio::test] // happy path
@@ -172,7 +170,7 @@ async fn visiting_right_score_id_returns_claim_form() {
 
     let id = submit_score(&server).await;
 
-    let response = server.get(&format!("/claim/{}", id)).await;
+    let response = server.get(&format!("/claim/{id}")).await;
     response.assert_status_ok();
 }
 
@@ -193,7 +191,7 @@ async fn claimed_score_shows_up_on_leaderboard() {
         lastname: "".to_owned(),
     };
 
-    let response = server.post(&format!("/claim/{}", id)).form(&body).await;
+    let response = server.post(&format!("/claim/{id}")).form(&body).await;
 
     response.assert_status(StatusCode::SEE_OTHER); // we want a redirect to /claim/list
 
@@ -351,7 +349,8 @@ async fn form_submit_unset_checkboxes_dont_copy_internally() {
         lastname: "".to_owned(),
     };
 
-    let response = server.post(&format!("/claim/{}", id)).form(&body).await;
+    let response = server.post(&format!("/claim/{id}")).form(&body).await;
+    response.assert_status_in_range(300..400);
 
     todo!()
 }

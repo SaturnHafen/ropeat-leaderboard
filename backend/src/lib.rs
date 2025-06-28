@@ -69,12 +69,12 @@ struct ClaimScore {
     lastname: String,
 }
 
-impl Into<HPIFormSubmission> for ClaimScore {
-    fn into(self) -> HPIFormSubmission {
+impl From<ClaimScore> for HPIFormSubmission {
+    fn from(val: ClaimScore) -> Self {
         HPIFormSubmission {
-            firstname: self.firstname,
-            lastname: self.lastname,
-            email: self.email,
+            firstname: val.firstname,
+            lastname: val.lastname,
+            email: val.email,
         }
     }
 }

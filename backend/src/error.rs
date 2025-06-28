@@ -28,20 +28,19 @@ impl std::fmt::Display for LeaderboardError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             LeaderboardError::AxumServer(x) => {
-                write!(fmt, "Couldn't start the server! Reason: {}", x)
+                write!(fmt, "Couldn't start the server! Reason: {x}")
             }
             LeaderboardError::TcpListener(x) => {
-                write!(fmt, "Couldn't launch TcpListener! Reason: {}", x)
+                write!(fmt, "Couldn't launch TcpListener! Reason: {x}")
             }
             LeaderboardError::DatabaseSetup(x) => {
                 write!(
                     fmt,
-                    "Something went wrong while starting the database! Reason: {}",
-                    x
+                    "Something went wrong while starting the database! Reason: {x}"
                 )
             }
             LeaderboardError::TransactionBeginError(x) => {
-                write!(fmt, "Couldn't start transaction. Reason: {}", x)
+                write!(fmt, "Couldn't start transaction. Reason: {x}")
             }
             LeaderboardError::MissingAuth => {
                 write!(fmt, "You didn't provide any credentials!")
@@ -55,24 +54,23 @@ impl std::fmt::Display for LeaderboardError {
             LeaderboardError::TransmitError(x) => {
                 write!(
                     fmt,
-                    "Couldn't transmit data to the HPI server! Reason: {}",
-                    x
+                    "Couldn't transmit data to the HPI server! Reason: {x}"
                 )
             }
             LeaderboardError::IncompleteData(x) => {
-                write!(fmt, "You didn't provide all necessary data points! ({})", x)
+                write!(fmt, "You didn't provide all necessary data points! ({x})")
             }
             LeaderboardError::InsertFailure(x) => {
-                write!(fmt, "Something went wrong while inserting! Reason: {}", x)
+                write!(fmt, "Something went wrong while inserting! Reason: {x}")
             }
             LeaderboardError::FetchError(x) => {
-                write!(fmt, "Couldn't fetch leaderboard! Reason: {}", x)
+                write!(fmt, "Couldn't fetch leaderboard! Reason: {x}")
             }
             LeaderboardError::DeleteError(x) => {
-                write!(fmt, "Couldn't delete unclaimed score! Reason: {}", x)
+                write!(fmt, "Couldn't delete unclaimed score! Reason: {x}")
             }
             LeaderboardError::RenderError(x) => {
-                write!(fmt, "Couldn't render template! Reason: {}", x)
+                write!(fmt, "Couldn't render template! Reason: {x}")
             }
             LeaderboardError::InvalidScore => {
                 write!(fmt, "The score is not valid!")
@@ -123,7 +121,7 @@ impl IntoResponse for LeaderboardError {
                 if cfg!(debug_assertions) {
                     Response::builder()
                         .status(StatusCode::INTERNAL_SERVER_ERROR)
-                        .body(Body::from(format!("FetchError: {}", x)))
+                        .body(Body::from(format!("FetchError: {x}")))
                         .unwrap()
                 } else {
                     Response::builder()

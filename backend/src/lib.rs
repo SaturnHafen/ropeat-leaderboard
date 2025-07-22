@@ -1,9 +1,13 @@
 mod error;
 mod helper;
 mod r#static;
+mod submission;
 mod templating;
 
 pub use error::LeaderboardError;
+
+use regex::bytes::Match;
+use submission::HPIFormData;
 
 use askama::Template;
 use axum::{
@@ -65,35 +69,52 @@ struct ClaimScore {
     wants_leaderboard: Option<bool>,
     wants_raffle: Option<bool>,
 
+    // leaderboard
     nickname: String,
 
+    // raffle etc.
     email: String,
     firstname: String,
     lastname: String,
+
+    // other stuff
+    newsletter: bool,
+    data_protection: Option<bool>,
+    occupation: String,
 }
 
-impl From<ClaimScore> for HPIFormSubmission {
+impl From<ClaimScore> for HPIFormData {
     fn from(val: ClaimScore) -> Self {
-        HPIFormSubmission {
+        let data_protection = "Ja, ich stimme zu.".to_string();
+
+        let occupation = match val.occupation.as_str() {
+            "school" => "Schüler:in".to_string(),
+            "university" => "Student:in".to_string(),
+            "parent" => "Elternteil".to_string(),
+            "other" => "sontiges".to_string(),
+            _ => "sonstiges".to_string(),
+        };
+
+        let email_consent = match val.newsletter {
+            true => "yes".to_string(),
+            false => "no".to_string(),
+        };
+
+        HPIFormData {
             firstname: val.firstname,
             lastname: val.lastname,
             email: val.email,
+            occupation,
+            email_consent,
+            data_processing_consent: data_protection,
         }
     }
 }
 
 #[derive(Clone)]
 struct LeaderboardConfig<'a> {
-    form_submit_url: &'a str,
     base_url: &'a str,
     token: &'a str,
-}
-
-#[derive(Debug, Clone, Serialize)]
-struct HPIFormSubmission {
-    firstname: String,
-    lastname: String,
-    email: String,
 }
 
 struct Database {
@@ -141,7 +162,6 @@ impl Database {
 
 pub async fn routes(auth_token: &'static str) -> Result<Router, LeaderboardError> {
     let state = LeaderboardConfig {
-        form_submit_url: "http://localhost:1234/asdf",
         base_url: "http://localhost:3000",
         token: auth_token,
     };
@@ -335,7 +355,8 @@ async fn claim_score_submit(
         if wants_raffle
             && (claim.email.trim_end().is_empty()
                 || claim.firstname.trim_end().is_empty()
-                || claim.lastname.trim_end().is_empty())
+                || claim.lastname.trim_end().is_empty()
+                || claim.data_protection.is_none())
         {
             todo!("Redirect back to form, something not provided");
         }
@@ -362,15 +383,9 @@ async fn claim_score_submit(
     }
 
     if submit_form {
-        let form_data: HPIFormSubmission = claim.into();
+        let form_data: HPIFormData = claim.into();
 
-        let client = reqwest::Client::new();
-        client
-            .post(state.form_submit_url)
-            .form(&form_data)
-            .send()
-            .await
-            .map_err(LeaderboardError::TransmitError)?;
+        let _: () = submission::submit_form(form_data).await?;
     }
 
     Ok(Redirect::to(&format!("{}/claim/list", state.base_url)))

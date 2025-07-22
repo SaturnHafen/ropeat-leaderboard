@@ -7,6 +7,7 @@
     </head>
     <script src="/assets/script.js" referrerpolicy="no-referror"></script>
     <body>
+        <div class="container">
         <form method="post">
             <div class="mb-3">
                 <input id="wants-leaderboard" name="wants_leaderboard" type="checkbox" class="form-check-input" value="true" />
@@ -30,10 +31,10 @@
 
                 <div class="expandable">
                     <p class="callout-info">
-                        Die Daten, die du hier eingibst, werden automatisch an ein Formular vom HPI weitergeleitet.<br />
-                        <strong>Um die Teilnahme zu bestätigen, bekommst du eine E-Mail, die du nochmal bestätigen musst.</strong><br />
+                        Die Daten, die du hier eingibst, werden automatisch an ein Formular von der HPI Öffentlichkeitsabeit weitergeleitet.<br />
 
-                        Die HPI-Öffentlichkeitsarbeit wird dir E-Mails bezüglich des Gewinnspiels und zu Studieninformationszwecken schicken.
+                        Die HPI-Öffentlichkeitsarbeit wird dir (abhängig von deiner Entscheidung unten) E-Mails bezüglich des Gewinnspiels
+                        und zu Studieninformationszwecken schicken.
 
                         <a href="https://hpi.de/impressum/" target="_blank">Hier gehts zum Impressum vom HPI</a>
                     </p>
@@ -54,16 +55,46 @@
                         </div>
                     </div>
 
+                    <h3 class="form-text">Ich bin </h3>
+                    <div class="mb-3">
+                        <select class="form-select" name="occupation">
+                            <option value="school">Schüler:in</option>
+                            <option value="university">Student:in</option>
+                            <option value="parent">Elternteil</option>
+                            <option value="other">sonstiges</option>
+                        </select>
+                    </div>
+
                     <!-- E-Mail stuff -->
                     <div class="form-floating mb-3">
                         <input id="email" name="email" type="email" class="form-control" aria-describedby="email-help" />
                         <label for="email" class="form-label">Deine E-Mail</label>
                         <p id="email-help" class="form-text">Die E-Mail, mit der du an der Verlosung teilnehmen möchtest und an die Infos vom HPI gesendet werden</p>
                     </div>
+
+                    <!-- E-Mail Spam -->
+                    <p class="form-text">Möchtest du Informationen zum Studium am HPI erhalten?</p>
+                    <div class="mb-3 form-check form-check-inline">
+                        <input id="newsletter1" name="newsletter" type="radio" class="form-check-input" value="true" />
+                        <label for="newsletter1" class="form-check-label">Ja</label>
+                    </div>
+                    <div class="mb-3 form-check form-check-inline">
+                        <input id="newsletter2" name="newsletter" type="radio" class="form-check-input" value="false" checked />
+                        <label for="newsletter2" class="form-check-label">Nein</label>
+                    </div>
+
+                    <!-- Datenschutz -->
+                    <h3 class="form-text">Datenschutz</h3>
+                    <div class="mb-3">
+                        <input id="data-protection" name="data_protection" type="checkbox" class="form-check-input" value="true" aria-describedby="data-protection-help" />
+                        <label for="data-protection" class="form-check-label">Ja, ich stimme zu.</label>
+                        <p id="data-protection-help" class="form-text">Hiermit stimme ich den <a href="https://hpi.de/datenschutz.html">Datenschutzrichtlinen</a> des Hasso-Plattner-Instituts zu.</p>
+                    </div>
                 </div>
             </div>
 
-            <input type="submit" class="btn btn-primary" />
+            <input type="submit" class="btn btn-primary" value="Formular absenden" />
+        </div>
         </form>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
     </body>

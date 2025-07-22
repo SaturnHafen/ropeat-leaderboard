@@ -5,6 +5,8 @@ use axum::{
 use reqwest::StatusCode;
 use serde_json::json;
 
+use crate::submission::SubmissionError;
+
 #[derive(Debug)]
 pub enum LeaderboardError {
     AxumServer(std::io::Error),
@@ -14,7 +16,7 @@ pub enum LeaderboardError {
     MissingAuth,
     WrongAuth,
     InvalidId,
-    TransmitError(reqwest::Error),
+    TransmitError(SubmissionError),
     InsertFailure(sqlx::Error),
     FetchError(sqlx::Error),
     DeleteError(sqlx::Error),
@@ -152,5 +154,11 @@ impl IntoResponse for LeaderboardError {
                 .body(Body::from(json!({"error": "Malformed color"}).to_string()))
                 .unwrap(),
         }
+    }
+}
+
+impl From<SubmissionError> for LeaderboardError {
+    fn from(value: SubmissionError) -> Self {
+        LeaderboardError::TransmitError(value)
     }
 }

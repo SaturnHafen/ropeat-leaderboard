@@ -35,11 +35,18 @@ struct GoodFormSubmitFormat {
     wants_leaderboard: Option<bool>,
     wants_raffle: Option<bool>,
 
+    // leaderboard
     nickname: String,
 
+    // raffle etc.
     email: String,
     firstname: String,
     lastname: String,
+
+    // other stuff
+    newsletter: bool,
+    data_protection: Option<bool>,
+    occupation: String,
 }
 
 #[derive(Serialize)]
@@ -105,6 +112,9 @@ async fn claim_score_2(server: &TestServer) {
         email: "".to_string(),
         firstname: "".to_string(),
         lastname: "".to_string(),
+        newsletter: false,
+        data_protection: Some(true),
+        occupation: "".to_string(),
     };
 
     let response = server.post(&format!("/claim/{id}")).form(&body).await;
@@ -122,6 +132,9 @@ async fn claim_score_username(server: &TestServer, nickname: &str) {
         email: "".to_string(),
         firstname: "".to_string(),
         lastname: "".to_owned(),
+        newsletter: false,
+        data_protection: None,
+        occupation: "".to_string(),
     };
 
     let response = server.post(&format!("/claim/{id}")).form(&body).await;
@@ -189,6 +202,9 @@ async fn claimed_score_shows_up_on_leaderboard() {
         email: "".to_string(),
         firstname: "".to_string(),
         lastname: "".to_owned(),
+        newsletter: false,
+        data_protection: None,
+        occupation: "".to_string(),
     };
 
     let response = server.post(&format!("/claim/{id}")).form(&body).await;
@@ -347,6 +363,9 @@ async fn form_submit_unset_checkboxes_dont_copy_internally() {
         email: "".to_string(),
         firstname: "".to_string(),
         lastname: "".to_owned(),
+        newsletter: false,
+        data_protection: None,
+        occupation: "".to_string(),
     };
 
     let response = server.post(&format!("/claim/{id}")).form(&body).await;
